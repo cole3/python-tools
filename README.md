@@ -6,3 +6,5 @@
     play the google translate sound
 ### weather.py
     get the qq weather info
+### get_android_code.py
+    get android code from web
