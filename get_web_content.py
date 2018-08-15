@@ -1,11 +1,11 @@
 #coding:utf-8
 
-import sys, os
+import sys, os, time
 import re
 import urllib2
 
 
-url = 'http://www.physicsandmathstutor.com/past-papers/a-level-chemistry/aqa-unit-6/'
+#url = 'http://www.physicsandmathstutor.com/a-level-maths-papers/c1-edexcel/'
 hdr = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
@@ -13,25 +13,43 @@ hdr = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML,
         'Accept-Language': 'en-US,en;q=0.8',
         'Connection': 'keep-alive'}
 
-def get_content(url):
-    req = urllib2.Request(url, headers=hdr)
-    response = urllib2.urlopen(req)
-    html = response.read()
-    return html
 
+def get_content(url, retries=10):
+	while True:
+		html = ""
+		req = urllib2.Request(url, headers=hdr)
+		try:
+			response = urllib2.urlopen(req, timeout=10)
+			html = response.read()
+		except Exception, what:
+			retries = retries - 1
+			if retries > 0:
+				print "retry"
+				continue
+		return html
+	
 def get_addrs(content):
     content = content.decode('utf-8')
     addrs = re.findall(r'(http://.*?\.pdf)', content)
     return addrs
 
 def save_files(addrs):
-    for addr in addrs:
-        name = os.path.basename(addr)
-        print "Downloading: " + name
-        fp = open(name, 'w')
-        content = get_content(addr)
-        fp.write(content)
-        fp.close()
+	for addr in addrs:
+		name = os.path.basename(addr)
+		print "Downloading: " + name
+		content = get_content(addr)
+		if content:
+			fp = open(name, 'wb')
+			fp.write(content)
+			fp.close()
+		else :
+			print "Download fail: " + name
+
+if len(sys.argv) < 2:
+	print '%s [web_address]' % sys.argv[0]
+	exit()
+
+url = sys.argv[1]
 
 content = get_content(url)
 #print content
