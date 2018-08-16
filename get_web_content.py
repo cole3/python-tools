@@ -49,6 +49,7 @@ def save_files(addrs):
 		name = os.path.basename(addr)
 		print "Downloading: " + name
 		content = get_content(addr)
+		#curl "https://pmt.physicsandmathstutor.com/wp-content/uploads/../../download/Maths/A-level/C1/Papers-Edexcel/January 2016 (IAL) MA - C12 Edexcel.pdf" -o "January 2016 (IAL) MA - C12 Edexcel.pdf" --retry 10
 		if content:
 			fp = open(name, 'wb')
 			fp.write(content)
