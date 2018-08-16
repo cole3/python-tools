@@ -13,13 +13,15 @@ hdr = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML,
         'Accept-Language': 'en-US,en;q=0.8',
         'Connection': 'keep-alive'}
 
+only_addr = 0
+
 
 def get_content(url, retries=10):
 	while True:
 		html = ""
 		req = urllib2.Request(url, headers=hdr)
 		try:
-			response = urllib2.urlopen(req, timeout=10)
+			response = urllib2.urlopen(req, timeout=20)
 			html = response.read()
 		except Exception, what:
 			retries = retries - 1
@@ -34,6 +36,15 @@ def get_addrs(content):
     return addrs
 
 def save_files(addrs):
+	print "Downloading: pdf addresses"
+	fp = open("address.txt", 'w')
+	for addr in addrs:
+		fp.write(addr+'\n')
+	fp.close()
+	
+	if only_addr:
+		return
+	
 	for addr in addrs:
 		name = os.path.basename(addr)
 		print "Downloading: " + name
@@ -45,15 +56,24 @@ def save_files(addrs):
 		else :
 			print "Download fail: " + name
 
-if len(sys.argv) < 2:
-	print '%s [web_address]' % sys.argv[0]
-	exit()
+			
 
-url = sys.argv[1]
 
-content = get_content(url)
-#print content
-addrs = get_addrs(content)
-#print addrs
-save_files(addrs)
-print 'Done.'
+if __name__ == '__main__':
+	if len(sys.argv) < 2:
+		print '%s [web_address]' % sys.argv[0]
+		print '%s --only_addr [web_address]' % sys.argv[0]
+		exit()
+		
+	if len(sys.argv) > 2:
+		if sys.argv[1] == "--only_addr":
+			only_addr = 1
+		
+	url = sys.argv[-1]
+
+	content = get_content(url)
+	#print content
+	addrs = get_addrs(content)
+	#print addrs
+	save_files(addrs)
+	print 'Done.'
